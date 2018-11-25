@@ -30,19 +30,19 @@ var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 // Recognizer and and Dialog for preview QnAMaker service
-// var previewRecognizer = new builder_cognitiveservices.QnAMakerRecognizer({
-//     knowledgeBaseId: process.env.QnAKnowledgebaseId,
-//     authKey: process.env.QnAAuthKey || process.env.QnASubscriptionKey
-// });
+var previewRecognizer = new builder_cognitiveservices.QnAMakerRecognizer({
+    knowledgeBaseId: process.env.QnAKnowledgebaseId,
+    authKey: process.env.QnAAuthKey || process.env.QnASubscriptionKey
+});
 
-// var basicQnAMakerPreviewDialog = new builder_cognitiveservices.QnAMakerDialog({
-//     recognizers: [previewRecognizer],
-//     defaultMessage: '你说什么？？',
-//     qnaThreshold: 0.3
-// }
-// );
+var basicQnAMakerPreviewDialog = new builder_cognitiveservices.QnAMakerDialog({
+    recognizers: [previewRecognizer],
+    defaultMessage: '你说什么？？',
+    qnaThreshold: 0.3
+}
+);
 
-// bot.dialog('basicQnAMakerPreviewDialog', basicQnAMakerPreviewDialog);
+bot.dialog('basicQnAMakerPreviewDialog', basicQnAMakerPreviewDialog);
 
 // Recognizer and and Dialog for GA QnAMaker service
 var recognizer = new builder_cognitiveservices.QnAMakerRecognizer({
@@ -60,13 +60,30 @@ var basicQnAMakerDialog = new builder_cognitiveservices.QnAMakerDialog({
 
 bot.dialog('basicQnAMakerDialog', basicQnAMakerDialog);
 
-bot.dialog('/', //basicQnAMakerDialog);
-    [
-        function (session) {
-            var qnaKnowledgebaseId = process.env.QnAKnowledgebaseId;
-            var qnaAuthKey = process.env.QnAAuthKey || process.env.QnASubscriptionKey;
-            var endpointHostName = process.env.QnAEndpointHostName;
+// bot.dialog('/', //basicQnAMakerDialog);
+//     [
+//         function (session) {
+//             var qnaKnowledgebaseId = process.env.QnAKnowledgebaseId;
+//             var qnaAuthKey = process.env.QnAAuthKey || process.env.QnASubscriptionKey;
+//             var endpointHostName = process.env.QnAEndpointHostName;
 
+//             // QnA Subscription Key and KnowledgeBase Id null verification
+//             if ((qnaAuthKey == null || qnaAuthKey == '') || (qnaKnowledgebaseId == null || qnaKnowledgebaseId == ''))
+//                 session.send('Please set QnAKnowledgebaseId, QnAAuthKey and QnAEndpointHostName (if applicable) in App Settings. Learn how to get them at https://aka.ms/qnaabssetup.');
+//             else {
+//                 if (endpointHostName == null || endpointHostName == '')
+//                     // Replace with Preview QnAMakerDialog service
+//                     session.replaceDialog('basicQnAMakerPreviewDialog');
+//                 else
+//                     // Replace with GA QnAMakerDialog service
+//                     session.replaceDialog('basicQnAMakerDialog');
+//             }
+
+//     ]);
+
+bot.dialog('/',
+[
+        function (session) {
             const msg = session.message.text;
             const request = require('request');
             var JSONBody = { "documents": [{ "language": "ch", "id": "string", "text": msg }] };
@@ -76,22 +93,7 @@ bot.dialog('/', //basicQnAMakerDialog);
                 url: 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment',
                 json: JSONBody
     
-
-            // QnA Subscription Key and KnowledgeBase Id null verification
-            if ((qnaAuthKey == null || qnaAuthKey == '') || (qnaKnowledgebaseId == null || qnaKnowledgebaseId == ''))
-                session.send('Please set QnAKnowledgebaseId, QnAAuthKey and QnAEndpointHostName (if applicable) in App Settings. Learn how to get them at https://aka.ms/qnaabssetup.');
-            else {
-                if (endpointHostName == null || endpointHostName == '')
-                    // Replace with Preview QnAMakerDialog service
-                    session.replaceDialog('basicQnAMakerPreviewDialog');
-                else
-                    // Replace with GA QnAMakerDialog service
-                    session.replaceDialog('basicQnAMakerDialog');
-            }
-
-
-
-            function (error, response, body) {
+            }, function (error, response, body) {
                 if (error) {
                     session.send(error);
                 } else {
@@ -109,40 +111,7 @@ bot.dialog('/', //basicQnAMakerDialog);
                     }
                     session.send("文本情感值: " + body.documents[0].score);
                 }
+            });
         }
     ]);
-
-// bot.dialog('sentiment', 
-// [
-//         function (session) {
-//             const msg = session.message.text;
-//             const request = require('request');
-//             var JSONBody = { "documents": [{ "language": "ch", "id": "string", "text": msg }] };
-    
-//             request.post({
-//                 headers: { 'content-type': 'application/json', 'Ocp-Apim-Subscription-Key': textAnalyticsAPIKey },
-//                 url: 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment',
-//                 json: JSONBody
-    
-//             }, function (error, response, body) {
-//                 if (error) {
-//                     session.send(error);
-//                 } else {
-//                     const sentimentScore = body.documents[0].score;
-//                     if (sentimentScore > .8) {
-//                         session.send(":)");
-//                     } else if (sentimentScore > .5) {
-//                         session.send(":|");
-//                     } else if (sentimentScore > .3) {
-//                         session.send(":O");
-//                     } else if (sentimentScore > .1) {
-//                         session.send(":\\");
-//                     } else {
-//                         session.send(":(");
-//                     }
-//                     session.send("文本情感值: " + body.documents[0].score);
-//                 }
-//             });
-//         }
-//     ]);
     
