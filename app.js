@@ -20,7 +20,6 @@ var connector = new builder.ChatConnector({
 
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
-bot.use(builder.Middleware.dialogVersion({ version: 0.2, resetCommand: /^reset/i }));
 
 var tableName = 'botdata';
 var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
@@ -38,7 +37,7 @@ var previewRecognizer = new builder_cognitiveservices.QnAMakerRecognizer({
 
 var basicQnAMakerPreviewDialog = new builder_cognitiveservices.QnAMakerDialog({
     recognizers: [previewRecognizer],
-    defaultMessage: '你说什么？？',
+    defaultMessage: 'No match! Try changing the query terms!',
     qnaThreshold: 0.3
 }
 );
@@ -54,14 +53,14 @@ var recognizer = new builder_cognitiveservices.QnAMakerRecognizer({
 
 var basicQnAMakerDialog = new builder_cognitiveservices.QnAMakerDialog({
     recognizers: [recognizer],
-    defaultMessage: '你说什么1？',
+    defaultMessage: '你说什么？',
     qnaThreshold: 0.3
 }
 );
 
 bot.dialog('basicQnAMakerDialog', basicQnAMakerDialog);
 
-bot.dialog('/', //basicQnAMakerDialog);
+bot.dialog('qna', //basicQnAMakerDialog);
     [
         function (session) {
             var qnaKnowledgebaseId = process.env.QnAKnowledgebaseId;
@@ -79,42 +78,42 @@ bot.dialog('/', //basicQnAMakerDialog);
                     // Replace with GA QnAMakerDialog service
                     session.replaceDialog('basicQnAMakerDialog');
             }
-
+        }
     ]);
 
-// bot.dialog('sentiment',
-// [
-//         function (session) {
-//             const msg = session.message.text;
-//             const request = require('request');
-//             var JSONBody = { "documents": [{ "language": "ch", "id": "string", "text": msg }] };
+    bot.dialog('/', [
+        function (session) {
+            const msg = session.message.text;
+            const request = require('request');
+            var JSONBody = { "documents": [{ "language": "ch", "id": "string", "text": msg }] };
     
-//             request.post({
-//                 headers: { 'content-type': 'application/json', 'Ocp-Apim-Subscription-Key': textAnalyticsAPIKey },
-//                 url: 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment',
-//                 json: JSONBody
+            request.post({
+                headers: { 'content-type': 'application/json', 'Ocp-Apim-Subscription-Key': textAnalyticsAPIKey },
+                url: 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0',
+                json: JSONBody
     
-//             }, 
+            }, 
             
-//         function (error, response, body) {
-//                 if (error) {
-//                     session.send(error);
-//                 } else {
-//                     const sentimentScore = body.documents[0].score;
-//                     if (sentimentScore > .8) {
-//                         session.send(":)");
-//                     } else if (sentimentScore > .5) {
-//                         session.send(":|");
-//                     } else if (sentimentScore > .3) {
-//                         session.send(":O");
-//                     } else if (sentimentScore > .1) {
-//                         session.send(":\\");
-//                     } else {
-//                         session.send(":(");
-//                     }
-//                     session.send("文本情感值: " + body.documents[0].score);
-//                 }
-//             });
-//         }
-//     ]);
+            function (error, response, body) {
+                if (error) {
+                    session.send(error);
+                } else {
+                    const sentimentScore = body.documents[0].score;
+                    if (sentimentScore > .8) {
+                        session.send(":)");
+                    } else if (sentimentScore > .5) {
+                        session.send(":|");
+                    } else if (sentimentScore > .3) {
+                        session.send(":O");
+                    } else if (sentimentScore > .1) {
+                        session.send(":\\");
+                    } else {
+                        session.send(":(");
+                    }
+                    session.send("The sentiment score for your input was: " + body.documents[0].score);
+                    session.beginDialog('qna')
+                }
+            });
+        }
+    ]);
     
