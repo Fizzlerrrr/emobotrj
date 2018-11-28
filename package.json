@@ -1,7 +1,7 @@
 {
-  "name": "QnABot",
+  "name": "emobotrj",
   "version": "1.0.0",
-  "description": "",
+  "description": "1. make code change in the online editor",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
