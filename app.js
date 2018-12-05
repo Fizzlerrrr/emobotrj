@@ -1,10 +1,10 @@
 var restify = require('restify');
 var builder = require('botbuilder');
-var botbuilder_azure = require("botbuilder-azure");
+//var botbuilder_azure = require("botbuilder-azure");
 var builder_cognitiveservices = require("botbuilder-cognitiveservices");
 var https = require('https');
 var rp = require('request-promise');
-var motivation = require("motivation");
+//var motivation = require("motivation");
 
 var header = {'Content-Type':'application/json', 'Ocp-Apim-Subscription-Key':'2da990e859714a8eb2ead6284c1b2c6e'}
 var requestUrl = 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment';
@@ -23,12 +23,12 @@ var connector = new builder.ChatConnector({
 
 server.post('/api/messages', connector.listen());
 
-var tableName = 'botdata';
-var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
-var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
+//var tableName = 'botdata';
+//var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
+//var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
 
 var bot = new builder.UniversalBot(connector);
-bot.set('storage', tableStorage);
+//bot.set('storage', tableStorage);
 
 var recognizer = new builder_cognitiveservices.QnAMakerRecognizer({
     knowledgeBaseId: process.env.QnAKnowledgebaseId,
@@ -58,29 +58,19 @@ bot.dialog('basicQnAMakerDialog', basicQnAMakerDialog);
 
 bot.dialog('/', function(session) {
     
+//        sendGetSentimentRequest(session.message.text).then(function (parsedBody) {                    
+//            console.log(parsedBody);
+//            var score = parsedBody.documents[0].score.toString();
+//            session.send('Your score: '+ score);
+//        })
+//        .catch(function (err) {
+//            console.log("POST FAILED: " + err);
+//        });
     
-        sendGetSentimentRequest(session.message.text).then(function (parsedBody) {                    
-            console.log(parsedBody);
-            var score = parsedBody.documents[0].score.toString();
-            session.send('Your score: '+ score);
-//            if(score > 0.80) {                    // happy
-//			         session.send('happy' + score);
-//             } else if(score > 0.1) {             // stressed
-//			         session.send('stressed' + score);
-//             } else {                             // crisis
-//                   session.send('crisis' + score);
-//             }
-        })
-        .catch(function (err) {
-            console.log("POST FAILED: " + err);
-        });
-
             var qnaKnowledgebaseId = QnAKnowledgebaseId;
             var qnaAuthKey = QnAAuthKey || process.env.QnASubscriptionKey;
             var endpointHostName = QnAEndpointHostName;
             session.beginDialog('basicQnAMakerDialog');
-    
-    
   });
 
 function sendGetSentimentRequest(message) {
@@ -90,17 +80,11 @@ function sendGetSentimentRequest(message) {
         body: {
             documents:[{id:'1', language: 'zh', text:message}]
         },
-        json: true, // Automatically stringifies the body to JSON,
+        json: true, 
         headers: header
     };
     return rp(options);
 }
-
-
-
-
-
-
 
 bot.on('conversationUpdate', function (message) {
     if (message.membersAdded[0].id === message.address.bot.id) {
