@@ -23,6 +23,10 @@ var connector = new builder.ChatConnector({
 
 server.post('/api/messages', connector.listen());
 
+var QnAAuthKey = '4ffdbcc6-2b58-4606-a186-b6008b0a9874';
+var QnAKnowledgebaseId = '06b6bed1-c2ef-4a07-b8c7-6eb1318073fa';
+var QnAEndpointHostName = 'https://emoqna.azurewebsites.net/qnamaker';
+
 //var tableName = 'botdata';
 //var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
 //var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
@@ -31,9 +35,9 @@ var bot = new builder.UniversalBot(connector);
 //bot.set('storage', tableStorage);
 
 var recognizer = new builder_cognitiveservices.QnAMakerRecognizer({
-    knowledgeBaseId: process.env.QnAKnowledgebaseId,
-    authKey: process.env.QnAAuthKey || process.env.QnASubscriptionKey, // Backward compatibility with QnAMaker (Preview)
-    endpointHostName: process.env.QnAEndpointHostName
+    knowledgeBaseId: QnAKnowledgebaseId,
+    authKey: QnAAuthKey,
+    endpointHostName: QnAEndpointHostName
 });
 
 var basicQnAMakerDialog = new builder_cognitiveservices.QnAMakerDialog({
@@ -58,17 +62,17 @@ bot.dialog('basicQnAMakerDialog', basicQnAMakerDialog);
 
 bot.dialog('/', function(session) {
     
-//        sendGetSentimentRequest(session.message.text).then(function (parsedBody) {                    
-//            console.log(parsedBody);
-//            var score = parsedBody.documents[0].score.toString();
-//            session.send('Your score: '+ score);
-//        })
-//        .catch(function (err) {
-//            console.log("POST FAILED: " + err);
-//        });
+        sendGetSentimentRequest(session.message.text).then(function (parsedBody) {                    
+            console.log(parsedBody);
+            var score = parsedBody.documents[0].score.toString();
+            session.send('Your score: '+ score);
+        })
+        .catch(function (err) {
+            console.log("POST FAILED: " + err);
+        });
     
             var qnaKnowledgebaseId = QnAKnowledgebaseId;
-            var qnaAuthKey = QnAAuthKey || process.env.QnASubscriptionKey;
+            var qnaAuthKey = QnAAuthKey;
             var endpointHostName = QnAEndpointHostName;
             session.beginDialog('basicQnAMakerDialog');
   });
