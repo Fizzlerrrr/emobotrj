@@ -22,8 +22,6 @@ var connector = new builder.ChatConnector({
     openIdMetadata: process.env.BotOpenIdMetadata 
 });
 
-server.post('/api/messages', connector.listen());
-
 var bot = new builder.UniversalBot(connector);
 
 server.post('/api/messages', connector.listen());
@@ -94,7 +92,7 @@ function sendGetSentimentRequest(message) {
         method: 'POST',
         uri: requestUrl,
         body: {
-            documents:[{id:'1', language: 'en', text:message}]
+            documents:[{id:'1', language: 'zh', text:message}]
         },
         json: true, // Automatically stringifies the body to JSON,
         headers: header
