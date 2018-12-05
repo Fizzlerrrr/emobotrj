@@ -1,6 +1,6 @@
 var restify = require('restify');
 var builder = require('botbuilder');
-//var botbuilder_azure = require("botbuilder-azure");
+var botbuilder_azure = require("botbuilder-azure");
 var builder_cognitiveservices = require("botbuilder-cognitiveservices");
 var https = require('https');
 var rp = require('request-promise');
@@ -27,12 +27,12 @@ var QnAAuthKey = '4ffdbcc6-2b58-4606-a186-b6008b0a9874';
 var QnAKnowledgebaseId = '06b6bed1-c2ef-4a07-b8c7-6eb1318073fa';
 var QnAEndpointHostName = 'https://emoqna.azurewebsites.net/qnamaker';
 
-//var tableName = 'botdata';
-//var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
-//var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
+var tableName = 'botdata';
+var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
+var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
 
 var bot = new builder.UniversalBot(connector);
-//bot.set('storage', tableStorage);
+bot.set('storage', tableStorage);
 
 var recognizer = new builder_cognitiveservices.QnAMakerRecognizer({
     knowledgeBaseId: QnAKnowledgebaseId,
